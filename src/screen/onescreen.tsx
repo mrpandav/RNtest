@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  Alert,
 } from "react-native";
 import { character } from "../api/user";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -19,26 +20,38 @@ const One = () => {
   const [loader, setLoader] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [more, setmore] = useState(true);
-  const [isloder, setisloder] = useState(false);
- 
+  const [more, setMore] = useState(true);
+  const [isLoader, setIsLoader] = useState(false);
+  const [nextPage, setNextPage] = useState(null);
+  const [prevPage, setPrevPage] = useState(null);
+
   const fetchCharacters = async () => {
     try {
+       
       setLoader(true);
+      // Alert.alert(`${page ?? -1}`);
       const response = await character(page);
       console.log("Characters=====>:", response);
 
       if (response.data.results.length === 0) {
-        setmore(false);
+        setMore(false);
+      } else {
+        setMore(true);
       }
-      setCharacters((prevCharacters) => [
-        ...prevCharacters,
-        ...response.data.results,
-      ]);
 
+      if (page == 1) {
+        setCharacters(response.data.results);
+      } else {
+        setCharacters((prevCharacters) => [
+          ...prevCharacters,
+          ...response.data.results,
+        ]);
+      }
+
+      setNextPage(response.data.info.next);
+      setPrevPage(response.data.info.prev);
       //setCharacters(response.data.results);
     } catch (error) {
-      
       setError("Failed to fetch characters");
       //console.log("bdjcdb==> Error fetching characters:", error);
     } finally {
@@ -49,35 +62,33 @@ const One = () => {
     fetchCharacters();
   }, [page]);
 
-  const enditam = () => {
-    if (!loader && more) {
+  const loadMoreData = () => {
+    if (!loader && nextPage) {
       setPage((prevPage) => prevPage + 1);
     }
-     setLoader(false);
   };
-  
 
-  useEffect(()=>{
-    console.log('bdjcdb==>',characters.length)
-  },[characters])
-  if (loader && page === 1) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.page}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      </View>
-    );
-  }
+  useEffect(() => {
+    console.log("bdjcdb==>", characters.length);
+  }, [characters]);
+
+  // if (loader && page === 1) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <View style={styles.page}>
+  //         <ActivityIndicator size="large" color="#0000ff" />
+  //       </View>
+  //     </View>
+  //   );
+  // }
 
   const handleRefresh = async () => {
-    setisloder(true);
+    setIsLoader(true);
     setCharacters([]);
     setPage(1);
-    setmore(true);
+    setMore(true);
     await fetchCharacters();
-
-    setisloder(false);
+    setIsLoader(false);
   };
 
   // if (error) {
@@ -114,7 +125,7 @@ const One = () => {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id?.toString() || "key"}
           refreshControl={
-            <RefreshControl refreshing={isloder} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={isLoader} onRefresh={handleRefresh} />
           }
           renderItem={({ item }) => (
             <View style={styles.characterItem}>
@@ -144,7 +155,7 @@ const One = () => {
               </View>
             </View>
           )}
-          onEndReached={enditam}
+          onEndReached={loadMoreData}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             loader ? <ActivityIndicator size="large" color="#0000ff" /> : null
