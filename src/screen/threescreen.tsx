@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { episode } from "../api/user";
 
-const threescreen = () => {
+const Threescreen = () => {
   const navigation = useNavigation();
   const [characters, setCharacters] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -73,7 +73,7 @@ const threescreen = () => {
   );
 };
 
-export default threescreen;
+export default Threescreen;
 
 const styles = StyleSheet.create({
   container: {

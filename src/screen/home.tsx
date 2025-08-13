@@ -9,7 +9,9 @@ import {
 } from "react-native";
 
 const Home = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<any>(); 
+
+  
 
   return (
     <View style={styles.container}>

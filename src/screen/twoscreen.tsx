@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { location } from "../api/user";
 
-const twoscreen = () => {
+const Twoscreen = () => {
   const navigation = useNavigation();
   const [characters, setCharacters] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -74,7 +74,7 @@ const twoscreen = () => {
   );
 };
 
-export default twoscreen;
+export default Twoscreen;
 
 const styles = StyleSheet.create({
   container: {

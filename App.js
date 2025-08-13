@@ -3,10 +3,10 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import { NavigationContainer } from "@react-navigation/native";
-import home from "./src/screen/home";
-import onescreen from "./src/screen/onescreen";
-import twoscreen from "./src/screen/twoscreen";
-import threescreen from "./src/screen/threescreen";
+import home from "./src/screen/Home";
+import onescreen from "./src/screen/Onescreen";
+import twoscreen from "./src/screen/Twoscreen";
+import threescreen from "./src/screen/Threescreen";
 
 const Stack = createStackNavigator();
 export default function App() {
