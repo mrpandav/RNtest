@@ -20,36 +20,30 @@ const One = () => {
   const [loader, setLoader] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+ 
   const [more, setMore] = useState(true);
-  const [isLoader, setIsLoader] = useState(false);
-  const [nextPage, setNextPage] = useState(null);
-  const [prevPage, setPrevPage] = useState(null);
 
-  const fetchCharacters = async () => {
+  const fetchCharacters = async (isRefresh: boolean = false) => {
     try {
-       
+      if (loader || !more) return;
       setLoader(true);
-      // Alert.alert(`${page ?? -1}`);
-      const response = await character(page);
-      console.log("Characters=====>:", response);
+      const response = await character(isRefresh ? 1 : page);
+      console.log("Characters=====>: response", response);
 
-      if (response.data.results.length === 0) {
-        setMore(false);
-      } else {
-        setMore(true);
-      }
-
-      if (page == 1) {
+      if (page == 1 || isRefresh) {
         setCharacters(response.data.results);
+        setPage(2);
       } else {
         setCharacters((prevCharacters) => [
           ...prevCharacters,
           ...response.data.results,
         ]);
+        setPage(page + 1);
       }
-
-      setNextPage(response.data.info.next);
-      setPrevPage(response.data.info.prev);
+      // setPage((prev) => prev + 1);
+      if (!response.data.info.next) {
+        setMore(false);
+      }
       //setCharacters(response.data.results);
     } catch (error) {
       setError("Failed to fetch characters");
@@ -59,53 +53,26 @@ const One = () => {
     }
   };
   useEffect(() => {
-    fetchCharacters();
-  }, [page]);
+    fetchCharacters(true);
+  }, []);
 
   const loadMoreData = () => {
-    if (!loader && nextPage) {
-      setPage((prevPage) => prevPage + 1);
-    }
+    if (loader || !more) return;
+    
+
+    fetchCharacters();
   };
 
   useEffect(() => {
     console.log("bdjcdb==>", characters.length);
   }, [characters]);
 
-  // if (loader && page === 1) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <View style={styles.page}>
-  //         <ActivityIndicator size="large" color="#0000ff" />
-  //       </View>
-  //     </View>
-  //   );
-  // }
-
-  const handleRefresh = async () => {
-    setIsLoader(true);
-    setCharacters([]);
+  const handleRefresh = () => {
+    if (loader) return;
     setPage(1);
-    setMore(true);
-    await fetchCharacters();
-    setIsLoader(false);
+    
+    fetchCharacters(true);
   };
-
-  // if (error) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <TouchableOpacity
-  //         onPress={() => navigation.goBack()}
-  //         style={styles.backButton}
-  //       >
-  //         <Text style={styles.backText}>Back</Text>
-  //       </TouchableOpacity>
-  //       <View style={styles.page}>
-  //         <Text style={styles.errorText}>{error}</Text>
-  //       </View>
-  //     </View>
-  //   );
-  // }
 
   return (
     <View style={styles.container}>
@@ -125,7 +92,10 @@ const One = () => {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id?.toString() || "key"}
           refreshControl={
-            <RefreshControl refreshing={isLoader} onRefresh={handleRefresh} />
+            <RefreshControl
+              refreshing={loader && page == 1}
+              onRefresh={handleRefresh}
+            />
           }
           renderItem={({ item }) => (
             <View style={styles.characterItem}>
@@ -156,7 +126,7 @@ const One = () => {
             </View>
           )}
           onEndReached={loadMoreData}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={1}
           ListFooterComponent={
             loader ? <ActivityIndicator size="large" color="#0000ff" /> : null
           }
